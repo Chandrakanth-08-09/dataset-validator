@@ -7,7 +7,10 @@ name = "dataset-validator"
 version = "0.1.0"
 description = "A framework to validate and sanitize datasets for sensitivity and compliance"
 authors = [
-    { name = "Chandrakanth R M", email = "chandrakanthrm89@gmail.com" }
+    { name = "Chandrakanth R M", email = "chandrakanthrm89@gmail.com" },
+    { name = "Abinaya S", email = "abinayas235@gmail.com" },
+    { name = "Ponmanoj P", email = "pponmanoj@gmail.com" },
+    { name = "Manish V", email = "manishvelu777@gmail.com" }
 ]
 readme = "README.md"
 license = { text = "MIT" }
