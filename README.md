@@ -34,3 +34,6 @@ export GEMINI_API_KEY="your_real_api_key"
 #### On Windows (PowerShell)
 $env:GEMINI_API_KEY="your_real_api_key"
 
+### On Windows (Windows CMD)
+set GEMINI_API_KEY=your_api_key_here
+
