@@ -11,7 +11,7 @@ cd dataset-validator
 2. **Install the library in editable mode with dev dependencies:**
 pip install -e .[dev]
 
-> This installs the library along with development tools like pytest, black, and flake8.
+> This installs the library along with development tools like pytest, black, and flake8 (specified in pyproject.toml).
 
 3. **Run tests to verify setup:**
 pytest -m 

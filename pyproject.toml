@@ -10,7 +10,8 @@ authors = [
     { name = "Chandrakanth R M", email = "chandrakanthrm89@gmail.com" },
     { name = "Abinaya S", email = "abinayas235@gmail.com" },
     { name = "Ponmanoj P", email = "pponmanoj@gmail.com" },
-    { name = "Manish V", email = "manishvelu777@gmail.com" }
+    { name = "Manish V", email = "manishvelu777@gmail.com" }, 
+    { name = "Sneha R", email = "sneharajeshrk@gmail.com"}
 ]
 readme = "README.md"
 license = { text = "MIT" }
