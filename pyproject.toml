@@ -20,7 +20,8 @@ dependencies = [
     "numpy",
     "google-generativeai",
     "pandas",
-    "scipy>=1.11"
+    "scipy>=1.11",
+    "cryptography"
 ]
 
 [project.optional-dependencies]
