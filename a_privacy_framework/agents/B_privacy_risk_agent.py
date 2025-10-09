@@ -2,19 +2,10 @@ import os
 import json
 import pandas as pd
 import numpy as np
-from agents.base_agent import BaseAgent
+from A_base_agent import BaseAgent
 
 class PrivacyRiskAssessmentAgent(BaseAgent):
     def __init__(self, k=3, l=2, t=0.2, weights=None):
-        """
-        Dataset-agnostic Privacy Risk Assessment Agent.
-        Automatically detects quasi-identifiers, sensitive attributes, and direct identifiers.
-        
-        k: k-anonymity threshold
-        l: l-diversity threshold
-        t: t-closeness threshold
-        weights: dict for combining risk scores {"k": float, "l": float, "t": float}
-        """
         super().__init__("Privacy Risk Assessment Agent")
         self.k = k
         self.l = l
@@ -28,12 +19,6 @@ class PrivacyRiskAssessmentAgent(BaseAgent):
             return pd.read_parquet(path)
 
     def _detect_columns(self, df: pd.DataFrame):
-        """
-        Automatically detect:
-        - direct_identifiers: mostly unique string columns
-        - quasi_identifiers: low-cardinality categorical/string or numeric columns
-        - sensitive_attributes: numeric/text columns that are neither QIs nor IDs
-        """
         direct_identifiers = []
         quasi_identifiers = []
         sensitive_attributes = []

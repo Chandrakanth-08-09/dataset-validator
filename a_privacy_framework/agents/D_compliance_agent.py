@@ -1,24 +1,15 @@
 import pandas as pd
 from datetime import datetime
-from agents.A_base_agent import BaseAgent
+from A_base_agent import BaseAgent
 from typing import List, Dict, Any, Optional
 
 class ComplianceAgent(BaseAgent):
     def __init__(self, consent_expiry_days: int = 365, sensitive_columns: Optional[List[str]] = None):
-        """
-        Generalized Compliance Agent.
-        Parameters:
-            consent_expiry_days: How long consent remains valid
-            sensitive_columns: Optional list of sensitive columns to monitor
-        """
         super().__init__("Compliance Agent")
         self.consent_expiry_days = consent_expiry_days
         self.sensitive_columns = sensitive_columns or []
 
     def enforce_direct_identifier_masking(self, df: pd.DataFrame, direct_identifiers: List[str]):
-        """
-        Drop or mask columns flagged as direct identifiers.
-        """
         cleaned = df.copy()
         dropped = []
         for col in direct_identifiers:
@@ -28,10 +19,6 @@ class ComplianceAgent(BaseAgent):
         return cleaned, dropped
 
     def enforce_consent_rules(self, df: pd.DataFrame):
-        """
-        Generic consent checks:
-        - Any column named consent_flag or consent_date (if present) will be validated.
-        """
         cleaned = df.copy()
         issues = []
 

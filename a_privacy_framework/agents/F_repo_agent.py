@@ -3,7 +3,7 @@ import json
 import hashlib
 import pandas as pd
 from cryptography.fernet import Fernet
-from agents.A_base_agent import BaseAgent
+from A_base_agent import BaseAgent
 
 class RepositoryAgent(BaseAgent):
     def __init__(self, before_path="data/1_raw", after_path="data/2_processed", reports_path="data/3_reports"):

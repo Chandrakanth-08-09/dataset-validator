@@ -52,5 +52,10 @@ def sensitivity_level(df: pd.DataFrame, attr_json: dict, k_threshold=5, l_thresh
         level = "Medium"
     else:
         level = "Low"
-
+    risk_report = {
+        "k_report": k_report,
+        "l_report": l_report,
+        "t_report": t_report,
+        "combined_risk": combined
+    }
     return level

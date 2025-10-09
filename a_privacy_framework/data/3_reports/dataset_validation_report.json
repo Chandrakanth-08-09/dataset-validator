@@ -1,0 +1,40 @@
+{
+    "privacy_report": {
+        "agent": "Privacy Risk Assessment",
+        "direct_identifiers": [
+            "Patient_ID",
+            "Full_Name",
+            "DOB",
+            "Contact_Number",
+            "Email",
+            "Address",
+            "Genetic_Markers",
+            "Lab_Results"
+        ],
+        "quasi_identifiers": [
+            "Age",
+            "Gender",
+            "Ethnicity",
+            "Occupation",
+            "Diagnosis_Code",
+            "Symptoms",
+            "Family_History",
+            "Treatment_Type",
+            "Treatment_Response",
+            "Hospital_ID",
+            "Consent_Flag",
+            "Consent_Date",
+            "Data_Source",
+            "Disease_Progression",
+            "Survival_Months",
+            "Readmission"
+        ],
+        "sensitive_attributes": [
+            "Zip_Code"
+        ],
+        "k_report": {
+            "metric": "k-anonymity",
+            "k_required": 3,
+            "min_group_size": 1,
+            "num_violating_groups": 67,
+            "is_satisfied": 

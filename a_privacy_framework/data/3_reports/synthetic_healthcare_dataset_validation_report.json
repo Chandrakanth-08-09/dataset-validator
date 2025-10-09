@@ -1,0 +1,79 @@
+{
+    "privacy_preserved": false,
+    "privacy_report": {
+        "direct_identifiers": [
+            "Patient_ID",
+            "Full_Name",
+            "DOB",
+            "Contact_Number",
+            "Email",
+            "Address",
+            "Genetic_Markers",
+            "Lab_Results"
+        ],
+        "quasi_identifiers": [
+            "Age",
+            "Gender",
+            "Ethnicity",
+            "Occupation",
+            "Diagnosis_Code",
+            "Symptoms",
+            "Family_History",
+            "Treatment_Type",
+            "Treatment_Response",
+            "Hospital_ID",
+            "Consent_Flag",
+            "Consent_Date",
+            "Data_Source",
+            "Disease_Progression",
+            "Survival_Months",
+            "Readmission"
+        ],
+        "sensitive_attributes": [
+            "Zip_Code"
+        ],
+        "k_report": {
+            "metric": "k-anonymity",
+            "k_required": 3,
+            "min_group_size": 1,
+            "num_violating_groups": 67,
+            "is_satisfied": false
+        },
+        "l_report": {
+            "metric": "l-diversity",
+            "l_required": 2,
+            "min_diversity": {
+                "Zip_Code": 1
+            },
+            "violating_groups_per_sensitive": {
+                "Zip_Code": 67
+            },
+            "is_satisfied": false
+        },
+        "t_report": {
+            "metric": "t-closeness",
+            "results": {
+                "Zip_Code": {
+                    "max_distance": 0.9990000000000002,
+                    "t_required": 0.2,
+                    "is_satisfied": false
+                }
+            }
+        },
+        "combined_risk": {
+            "k_risk": 0.6666666666666666,
+            "l_risk": 0.5,
+            "t_risk": 0.9990000000000002,
+            "combined_score": 0.7163666666666667
+        }
+    },
+    "compliance_report": {
+        "compliance": "checked"
+    },
+    "sensitivity_report": {
+        "sensitivity": "classified"
+    },
+    "before_repository_path": "data/1_raw/synthetic_healthcare_dataset.csv.enc",
+    "after_repository_path": "data/2_processed/synthetic_healthcare_dataset.csv",
+    "tamper_proof_hash": "da17715090e65a1b64d2e2a0dfef343f79536688fd751297abcb775e28e33ed0"
+}

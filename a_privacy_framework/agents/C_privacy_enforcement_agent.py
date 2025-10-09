@@ -25,8 +25,8 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, List, Optional
 
-from agents.A_base_agent import BaseAgent
-from agents.B_privacy_risk_agent import PrivacyRiskAssessmentAgent
+from A_base_agent import BaseAgent
+from B_privacy_risk_agent import PrivacyRiskAssessmentAgent
 
 class PrivacyEnforcementAgent(BaseAgent):
     def __init__(self,
@@ -40,9 +40,7 @@ class PrivacyEnforcementAgent(BaseAgent):
                  p_rr: float = 0.1,
                  max_iters: int = 5,
                  swap_fraction: float = 0.1):
-        """
-        Generalized Privacy Enforcement Agent.
-        """
+        
         super().__init__("Privacy Enforcement Agent")
         self.quasi_identifiers = quasi_identifiers or []
         self.sensitive_attributes = sensitive_attributes or []
