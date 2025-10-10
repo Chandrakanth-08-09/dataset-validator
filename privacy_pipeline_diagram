@@ -1,0 +1,16 @@
+// Privacy-Preserving Dataset Pipeline
+digraph {
+	rankdir=LR size=10
+	A [label="Raw Dataset"]
+	B [label="Privacy Risk Assessment Layer"]
+	C [label="Privacy Enforcement Layer"]
+	D [label="Regulatory Compliance Layer"]
+	E [label="Sensitivity Classification Layer"]
+	F [label="Repository & Validation Layer"]
+	A -> B [label="Input Dataset"]
+	B -> C [label="Risk Report Feedback"]
+	C -> D [label="Transformed Dataset"]
+	D -> E [label="Compliance Checked"]
+	E -> F [label="Sensitivity Scored & Ready for Storage"]
+	B -> C [label="Iterative Feedback" color=blue style=dashed]
+}

@@ -52,5 +52,4 @@ def sensitivity_level(df: pd.DataFrame, attr_json: dict, k_threshold=5, l_thresh
         level = "Medium"
     else:
         level = "Low"
-
     return level
