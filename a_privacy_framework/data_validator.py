@@ -25,7 +25,6 @@ class DataValidator:
                  after_path: str = "data/2_processed",
                  reports_path: str = "data/3_reports"):
 
-        # === Initialize defaults ===
         self.k = k
         self.l = l
         self.t = t
@@ -38,7 +37,7 @@ class DataValidator:
         self.after_path = after_path
         self.reports_path = reports_path
 
-        # === Sensitivity Classification Defaults ===
+        # Sensitivity classification defaults
         self.attribute_weights = custom_weights or {
             "direct_identifier": 1.0,
             "quasi_identifier": 0.7,
@@ -49,7 +48,7 @@ class DataValidator:
         self.keywords = {
             "direct_identifier": ["name", "email", "phone", "ssn", "address", "contact"],
             "quasi_identifier": ["age", "dob", "zip", "postcode", "ethnicity", "gender"],
-            "sensitive_attribute": [],
+            "sensitive_attribute": ["genetic", "lab", "disease"],
             "other": []
         }
 
@@ -60,13 +59,10 @@ class DataValidator:
                 else:
                     self.keywords[cat] = kws
 
-        # === Repository Key Management ===
         self.key_file = os.path.join(self.before_path, "encryption.key")
         self.key = self._load_or_create_key()
 
-    # ---------------------------------------------------------------------
-    # Utility and I/O
-    # ---------------------------------------------------------------------
+    # -------------------- Utilities --------------------
     def _load_dataset(self, path: str) -> pd.DataFrame:
         if path.lower().endswith(".csv"):
             return pd.read_csv(path)
@@ -83,33 +79,13 @@ class DataValidator:
             f.write(key)
         return key
 
-    def _encrypt_dataset(self, dataset: pd.DataFrame, filename: str):
-        fernet = Fernet(self.key)
-        csv_bytes = dataset.to_csv(index=False).encode()
-        encrypted = fernet.encrypt(csv_bytes)
-        filepath = os.path.join(self.before_path, filename + ".enc")
-        with open(filepath, "wb") as f:
-            f.write(encrypted)
-        return filepath
-
-    def _save_dataset(self, dataset: pd.DataFrame, filename: str, path: str):
-        os.makedirs(path, exist_ok=True)
-        filepath = os.path.join(path, filename)
-        dataset.to_csv(filepath, index=False)
-        return filepath
-
-    # ---------------------------------------------------------------------
-    # JSON Conversion & Hashing
-    # ---------------------------------------------------------------------
-    @staticmethod
-    def _convert_for_json(obj):
-        """Convert complex objects (NumPy, pandas, datetime, sets, etc.) into JSON-safe types."""
+    def _convert_for_json(self, obj):
         if isinstance(obj, np.bool_):
             return bool(obj)
         if isinstance(obj, (np.integer, np.int_)):
             return int(obj)
         if isinstance(obj, (np.floating, np.float_)):
-            return float(np.float32(obj))  # ✅ convert to float32
+            return float(np.float32(obj))
         if hasattr(obj, "isoformat"):
             return obj.isoformat()
         if isinstance(obj, set):
@@ -122,9 +98,7 @@ class DataValidator:
         report_bytes = json.dumps(report, sort_keys=True, default=self._convert_for_json).encode()
         return hashlib.sha256(report_bytes).hexdigest()
 
-    # ---------------------------------------------------------------------
-    # Sensitivity Classification
-    # ---------------------------------------------------------------------
+    # -------------------- Sensitivity --------------------
     def _detect_category(self, col_name: str):
         col_lower = col_name.lower()
         for category, kw_list in self.keywords.items():
@@ -152,9 +126,7 @@ class DataValidator:
             "classification": classification
         }
 
-    # ---------------------------------------------------------------------
-    # Privacy Risk Assessment
-    # ---------------------------------------------------------------------
+    # -------------------- Privacy Risk --------------------
     def _detect_columns(self, df: pd.DataFrame):
         direct_identifiers, quasi_identifiers, sensitive_attributes = [], [], []
         n_rows = len(df)
@@ -251,9 +223,61 @@ class DataValidator:
             "combined_risk": combined
         }
 
-    # ---------------------------------------------------------------------
-    # Compliance Agent
-    # ---------------------------------------------------------------------
+    # -------------------- Enforcement --------------------
+    def enforce_based_on_risk(self, df, privacy_report):
+        df_copy = df.copy()
+        qis = privacy_report["quasi_identifiers"]
+        sens = privacy_report["sensitive_attributes"]
+        k_failed = not privacy_report["k_report"]["is_satisfied"]
+        l_failed = not privacy_report["l_report"]["is_satisfied"]
+        t_failed = not all(v["is_satisfied"] for v in privacy_report["t_report"].get("results", {}).values())
+
+        # k-anonymity → generalize
+        if k_failed and qis:
+            df_copy = self.generalize_quasi_identifiers(df_copy, qis)
+
+        # l-diversity → perturb sensitive attributes
+        if l_failed and sens:
+            df_copy = self.perturb_sensitive_attributes(df_copy, sens, noise_fraction=0.05)
+
+        # t-closeness → apply DP to numeric sensitive attributes
+        if t_failed and sens:
+            df_copy = self.apply_differential_privacy(df_copy, sens, epsilon=self.dp_epsilon)
+
+        # Remove direct identifiers always
+        df_copy = self.enforce_direct_identifier_masking(df_copy, privacy_report["direct_identifiers"])
+        return df_copy
+
+    def generalize_quasi_identifiers(self, df, qis):
+        df_copy = df.copy()
+        for col in qis:
+            if pd.api.types.is_numeric_dtype(df_copy[col]):
+                df_copy[col] = (df_copy[col] // 10) * 10  # simple binning by tens
+            else:
+                df_copy[col] = df_copy[col].astype(str).str[0]  # first character only
+        return df_copy
+
+    def perturb_sensitive_attributes(self, df, sens, noise_fraction=0.05):
+        df_copy = df.copy()
+        for col in sens:
+            if pd.api.types.is_numeric_dtype(df_copy[col]):
+                noise = df_copy[col] * noise_fraction * np.random.randn(len(df_copy))
+                df_copy[col] += noise
+            else:
+                df_copy[col] = df_copy[col].apply(lambda x: x[::-1] if pd.notnull(x) else x)  # simple perturb
+        return df_copy
+
+    def apply_differential_privacy(self, df, sensitive_attributes, epsilon=1.0):
+        df_copy = df.copy()
+        for col in sensitive_attributes:
+            if pd.api.types.is_numeric_dtype(df_copy[col]):
+                sensitivity = df_copy[col].max() - df_copy[col].min()
+                scale = sensitivity / epsilon
+                noise = np.random.laplace(0, scale, len(df_copy))
+                df_copy[col] += noise
+        return df_copy
+
+    # -------------------- Compliance --------------------
     def enforce_direct_identifier_masking(self, df: pd.DataFrame, direct_identifiers: List[str]):
         cleaned = df.copy()
         for col in direct_identifiers:
@@ -300,9 +324,7 @@ class DataValidator:
         }
         return {"dataset": df_clean, "report": report}
 
-    # ---------------------------------------------------------------------
-    # Repository Management
-    # ---------------------------------------------------------------------
+    # -------------------- Repository --------------------
     def store_repository(self, dataset, privacy_report, compliance_report, sensitivity_report):
         validation_report = {
             "privacy": privacy_report,
@@ -317,32 +339,36 @@ class DataValidator:
 
         return validation_report
 
-    # ---------------------------------------------------------------------
-    # Unified Validation Pipeline
-    # ---------------------------------------------------------------------
+    # -------------------- Unified Validation --------------------
     def validate_dataset(self, dataset_path: str):
         df = self._load_dataset(dataset_path)
 
-        # 1️⃣ Sensitivity Classification
+        # Sensitivity Classification
         sensitivity_report = self.classify_sensitivity(df)
 
-        # 2️⃣ Privacy Risk Assessment
-        privacy_report = self.assess_privacy(df)
+        # Privacy Risk Assessment before enforcement
+        privacy_report_before = self.assess_privacy(df)
 
-        # 3️⃣ Compliance Checks
-        compliance_result = self.check_compliance(df, privacy_report["direct_identifiers"])
+        # Apply risk-driven enforcement
+        df_enforced = self.enforce_based_on_risk(df, privacy_report_before)
 
-        # 4️⃣ Repository Storage
+        # Privacy Risk Assessment after enforcement
+        privacy_report_after = self.assess_privacy(df_enforced)
+
+        # Compliance Checks on enforced dataset
+        compliance_result = self.check_compliance(df_enforced, privacy_report_after["direct_identifiers"])
+
+        # Store repository
         final_report = self.store_repository(
             compliance_result["dataset"],
-            privacy_report,
+            privacy_report_after,
             compliance_result["report"],
             sensitivity_report
         )
 
         return {
             "sensitivity": sensitivity_report,
-            "privacy": privacy_report,
+            "privacy": privacy_report_after,
             "compliance": compliance_result["report"],
             "repository": final_report
         }
